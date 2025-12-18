@@ -1,9 +1,5 @@
 <?php
-// Bật hiển thị lỗi để nếu có sai thì mình biết lỗi gì
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -16,26 +12,40 @@ $db   = "if0_40710470_exam";
 $conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    die(json_encode(["error" => "Kết nối thất bại"]));
+    die(json_encode(["status" => "error", "message" => "Kết nối thất bại"]));
 }
 
-// Tạo bảng đơn giản nhất
-$conn->query("CREATE TABLE IF NOT EXISTS students (id INT AUTO_INCREMENT PRIMARY KEY, name TEXT, mssv TEXT, class_name TEXT)");
+// Tự động tạo bảng
+$conn->query("CREATE TABLE IF NOT EXISTS students (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), mssv VARCHAR(50), class_name VARCHAR(50))");
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method == 'GET') {
-    $res = $conn->query("SELECT * FROM students ORDER BY id DESC");
-    $out = [];
-    while($r = $res->fetch_assoc()) { $out[] = $r; }
-    echo json_encode($out);
+    $result = $conn->query("SELECT * FROM students ORDER BY id DESC");
+    $data = [];
+    while($row = $result->fetch_assoc()) { $data[] = $row; }
+    echo json_encode($data);
 } elseif ($method == 'POST') {
-    $d = json_decode(file_get_contents('php://input'), true);
-    if ($d) {
+    // InfinityFree hỗ trợ nhận cả $_POST truyền thống và JSON
+    $name = $_POST['name'] ?? '';
+    $mssv = $_POST['mssv'] ?? '';
+    $class = $_POST['class_name'] ?? '';
+
+    // Nếu gửi dạng JSON (từ fetch)
+    if (empty($name)) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        $name = $json['name'] ?? '';
+        $mssv = $json['mssv'] ?? '';
+        $class = $json['class_name'] ?? '';
+    }
+
+    if ($name && $mssv && $class) {
         $stmt = $conn->prepare("INSERT INTO students (name, mssv, class_name) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $d['name'], $d['mssv'], $d['class_name']);
+        $stmt->bind_param("sss", $name, $mssv, $class);
         $stmt->execute();
-        echo json_encode(["status" => "ok"]);
+        echo json_encode(["status" => "success"]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Thiếu thông tin"]);
     }
 }
 $conn->close();

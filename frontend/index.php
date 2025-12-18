@@ -1,77 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Sinh Viên - Project 1</title>
+    <title>Quản Lý Sinh Viên</title>
     <style>
-        body {
-            font-family: sans-serif;
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
-            background: #f4f7f6;
-        }
-
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        input {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
+        body { font-family: sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; background: #f4f7f6; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <h2>🎓 Quản Lý Sinh Viên (FTP Auto-Deploy)</h2>
+        <h2>🎓 Quản Lý Sinh Viên (Project 1 - Fix)</h2>
         <input type="text" id="name" placeholder="Họ Tên">
         <input type="text" id="mssv" placeholder="MSSV">
         <input type="text" id="class_name" placeholder="Lớp">
         <button onclick="addStudent()">Thêm Mới</button>
-
-        <table id="studentTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Họ Tên</th>
-                    <th>MSSV</th>
-                    <th>Lớp</th>
-                </tr>
-            </thead>
+        <table>
+            <thead><tr><th>ID</th><th>Họ Tên</th><th>MSSV</th><th>Lớp</th></tr></thead>
             <tbody id="result"></tbody>
         </table>
     </div>
@@ -80,33 +30,36 @@
         const API = '../backend/api.php';
 
         async function loadStudents() {
-            const res = await fetch(API);
-            const data = await res.json();
-            let html = '';
-            data.forEach(s => {
-                html += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mssv}</td><td>${s.class_name}</td></tr>`;
-            });
-            document.getElementById('result').innerHTML = html;
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
+                let html = '';
+                data.forEach(s => {
+                    html += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mssv}</td><td>${s.class_name}</td></tr>`;
+                });
+                document.getElementById('result').innerHTML = html;
+            } catch (err) { console.error("Lỗi tải dữ liệu"); }
         }
 
         async function addStudent() {
             const name = document.getElementById('name').value;
             const mssv = document.getElementById('mssv').value;
-            const className = document.getElementById('class').value;
+            const class_name = document.getElementById('class_name').value;
 
-            const formData = new FormData();
-            formData.append("name", name);
-            formData.append("mssv", mssv);
-            formData.append("class", className);
+            if(!name || !mssv || !class_name) return alert("Nhập đủ thông tin!");
 
             await fetch(API, {
-                method: "POST",
-                body: formData
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, mssv, class_name })
             });
 
+            document.getElementById('name').value = '';
+            document.getElementById('mssv').value = '';
+            document.getElementById('class_name').value = '';
             loadStudents();
         }
+        loadStudents();
     </script>
 </body>
-
 </html>
