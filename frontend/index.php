@@ -2,14 +2,17 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Sinh Viên - Project 1</title>
+    <title>Quản Lý Sinh Viên - Full Chức Năng</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; background: #f4f7f6; }
+        body { font-family: sans-serif; max-width: 900px; margin: 30px auto; padding: 20px; background: #f4f7f6; }
         .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .form { display: flex; gap: 10px; margin-bottom: 20px; }
         input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; flex: 1; }
-        button { padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; }
+        button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-add { background: #28a745; }
+        .btn-edit { background: #ffc107; color: black; }
+        .btn-delete { background: #dc3545; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
         th { background: #007bff; color: white; }
     </style>
@@ -21,10 +24,14 @@
             <input type="text" id="name" placeholder="Họ Tên">
             <input type="text" id="mssv" placeholder="MSSV">
             <input type="text" id="class_name" placeholder="Lớp">
-            <button onclick="addStudent()">THÊM</button>
+            <button class="btn-add" onclick="addStudent()">THÊM</button>
         </div>
         <table>
-            <thead><tr><th>ID</th><th>Họ Tên</th><th>MSSV</th><th>Lớp</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Họ Tên</th><th>MSSV</th><th>Lớp</th><th>Hành Động</th>
+                </tr>
+            </thead>
             <tbody id="result"></tbody>
         </table>
     </div>
@@ -35,14 +42,20 @@
         async function loadStudents() {
             try {
                 const res = await fetch(API);
-                if (!res.ok) throw new Error("API Lỗi 500");
                 const data = await res.json();
-                document.getElementById('result').innerHTML = data.map(s => 
-                    `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mssv}</td><td>${s.class_name}</td></tr>`
-                ).join('');
-            } catch (err) {
-                document.getElementById('result').innerHTML = '<tr><td colspan="4" style="color:red; text-align:center">Lỗi: Hãy mở link API trực tiếp để xác thực trước!</td></tr>';
-            }
+                document.getElementById('result').innerHTML = data.map(s => `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.name}</td>
+                        <td>${s.mssv}</td>
+                        <td>${s.class_name}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editStudent(${s.id}, '${s.name}', '${s.mssv}', '${s.class_name}')">Sửa</button>
+                            <button class="btn-delete" onclick="deleteStudent(${s.id})">Xóa</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) { console.error("Lỗi tải dữ liệu"); }
         }
 
         async function addStudent() {
@@ -56,10 +69,35 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, mssv, class_name })
             });
-            
-            document.querySelectorAll('input').forEach(i => i.value = '');
+            clearInputs();
             loadStudents();
         }
+
+        async function deleteStudent(id) {
+            if(confirm('Bạn có chắc muốn xóa?')) {
+                await fetch(`${API}?id=${id}`, { method: 'DELETE' });
+                loadStudents();
+            }
+        }
+
+        async function editStudent(id, oldName, oldMssv, oldClass) {
+            const name = prompt("Tên mới:", oldName);
+            const mssv = prompt("MSSV mới:", oldMssv);
+            const class_name = prompt("Lớp mới:", oldClass);
+            if(name && mssv && class_name) {
+                await fetch(API, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, name, mssv, class_name })
+                });
+                loadStudents();
+            }
+        }
+
+        function clearInputs() {
+            document.querySelectorAll('input').forEach(i => i.value = '');
+        }
+
         loadStudents();
     </script>
 </body>
