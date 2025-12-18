@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-$host = "sql300.infinityfree.com"; 
+$host = "sql303.infinityfree.com"; 
 $user = "if0_40710470"; 
 $pass = "rya5RuDy9zjxF"; 
 $db   = "if0_40710470_exam";
