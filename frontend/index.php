@@ -92,31 +92,20 @@
         async function addStudent() {
             const name = document.getElementById('name').value;
             const mssv = document.getElementById('mssv').value;
-            const class_name = document.getElementById('class_name').value;
+            const className = document.getElementById('class').value;
 
-            if (!name || !mssv || !class_name) return alert("Vui lòng nhập đủ thông tin!");
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("mssv", mssv);
+            formData.append("class", className);
 
             await fetch(API, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json' // BẮT BUỘC PHẢI CÓ DÒNG NÀY
-                },
-                body: JSON.stringify({
-                    name,
-                    mssv,
-                    class_name
-                })
+                method: "POST",
+                body: formData
             });
 
-            // Xóa sạch ô nhập sau khi thêm
-            document.getElementById('name').value = '';
-            document.getElementById('mssv').value = '';
-            document.getElementById('class_name').value = '';
-
-            loadStudents(); // Tải lại bảng ngay lập tức
+            loadStudents();
         }
-
-        loadStudents();
     </script>
 </body>
 
