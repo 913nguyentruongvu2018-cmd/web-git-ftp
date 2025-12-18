@@ -77,7 +77,7 @@
     </div>
 
     <script>
-        const API = '/backend/api.php';
+        const API = '../backend/api.php';
 
         async function loadStudents() {
             const res = await fetch(API);
