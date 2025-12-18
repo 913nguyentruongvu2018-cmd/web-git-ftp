@@ -28,8 +28,12 @@ if ($method == 'GET') {
     echo json_encode($result->fetch_all(MYSQLI_ASSOC));
 } elseif ($method == 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
+    $name = $data['name'];
+    $mssv = $data['mssv'];
+    $class = $data['class_name']; // Đảm bảo tên này khớp với Frontend gửi lên
+
     $stmt = $conn->prepare("INSERT INTO students (name, mssv, class_name) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $data['name'], $data['mssv'], $data['class_name']);
+    $stmt->bind_param("sss", $name, $mssv, $class);
     $stmt->execute();
     echo json_encode(["status" => "success"]);
 }
